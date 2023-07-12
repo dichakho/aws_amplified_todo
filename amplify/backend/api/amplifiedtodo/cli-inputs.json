@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "serviceConfiguration": {
+    "apiName": "amplifiedtodo",
+    "serviceName": "AppSync",
+    "defaultAuthType": {
+      "mode": "API_KEY",
+      "expirationTime": 7,
+      "apiKeyExpirationDate": "2023-07-18T10:06:24.162Z",
+      "keyDescription": "da2-vckvku3nh5bkbmriba2xg2kf2m"
+    },
+    "conflictResolution": {},
+    "additionalAuthTypes": []
+  }
+}
