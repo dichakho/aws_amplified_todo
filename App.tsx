@@ -5,12 +5,13 @@
  * @format
  */
 
-import {Amplify, API, Auth, graphqlOperation} from 'aws-amplify';
+import {API, Auth, graphqlOperation} from 'aws-amplify';
 //@ts-ignore
 import {withAuthenticator} from 'aws-amplify-react-native';
 import React, {useEffect, useState} from 'react';
 import {
   FlatList,
+  Image,
   SafeAreaView,
   StyleSheet,
   Text,
@@ -19,8 +20,6 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
-import awsExports from './src/aws-exports';
-Amplify.configure(awsExports);
 
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {
@@ -34,7 +33,7 @@ import {GraphQLResult} from '@aws-amplify/api';
 import {createTodo, deleteTodo, updateTodo} from './src/graphql/mutations';
 import {listTodos} from './src/graphql/queries';
 
-const initialFormState = {name: '', description: ''};
+const initialFormState = {name: '', description: '', isDone: false};
 
 function App(): JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
@@ -60,7 +59,7 @@ function App(): JSX.Element {
     fetchTodos();
   }, []);
 
-  function setInput(key: string, value: string) {
+  function setInput(key: string, value: string | boolean) {
     setFormState({...formState, [key]: value});
   }
   // const {signOut} = useAuthenticator();
@@ -104,6 +103,7 @@ function App(): JSX.Element {
             id: updateTaskId,
             name: formState.name,
             description: formState.description,
+            isDone: formState.isDone,
           },
         }),
       )) as GraphQLResult<UpdateTodoMutation>;
@@ -152,8 +152,12 @@ function App(): JSX.Element {
     return (
       <View style={styles.todo}>
         <View>
-          <Text style={styles.todoName}>{item?.name}</Text>
-          <Text>{item?.description}</Text>
+          <Text style={[styles.todoName, item?.isDone && styles.doneText]}>
+            {item?.name}
+          </Text>
+          <Text style={item?.isDone && styles.doneText}>
+            {item?.description}
+          </Text>
         </View>
         <View style={styles.row}>
           <TouchableOpacity
@@ -163,6 +167,7 @@ function App(): JSX.Element {
                 setFormState({
                   name: item.name,
                   description: item.description,
+                  isDone: !!item.isDone,
                 });
                 setUpdateTaskId(item.id);
               }
@@ -193,6 +198,16 @@ function App(): JSX.Element {
         value={formState.description}
         placeholder="Description"
       />
+      <View style={styles.rowHCenter}>
+        <Text>Done</Text>
+        <TouchableOpacity
+          onPress={() => setInput('isDone', !formState.isDone)}
+          style={styles.checkbox}>
+          {formState.isDone && (
+            <Image source={require('./src/assets/check.png')} />
+          )}
+        </TouchableOpacity>
+      </View>
       <TouchableOpacity onPress={upsertTodo} style={styles.buttonContainer}>
         <Text style={styles.buttonText}>Submit</Text>
       </TouchableOpacity>
@@ -259,6 +274,19 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
   },
+  rowHCenter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  checkbox: {
+    borderWidth: 1,
+    width: 25,
+    height: 25,
+    marginLeft: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  doneText: {textDecorationLine: 'line-through'},
 });
 
 export default withAuthenticator(App);
